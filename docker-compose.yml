@@ -1,0 +1,168 @@
+version: '3.8'
+
+services:
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_AUTH_SERVICE_URL=http://localhost:3001
+    depends_on:
+      - auth-service
+    networks:
+      - libreria-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./microservices/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://auth_user:auth_password@auth-db:5432/auth_db
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - JWT_EXPIRES_IN=24h
+    depends_on:
+      - auth-db
+    networks:
+      - libreria-network
+
+  # Product Service (estructura base)
+  product-service:
+    build:
+      context: ./microservices/product-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://product_user:product_password@product-db:5432/product_db
+    depends_on:
+      - product-db
+    networks:
+      - libreria-network
+
+  # Invoice Service (estructura base)
+  invoice-service:
+    build:
+      context: ./microservices/invoice-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://invoice_user:invoice_password@invoice-db:5432/invoice_db
+    depends_on:
+      - invoice-db
+    networks:
+      - libreria-network
+
+  # Chat Service (estructura base)
+  chat-service:
+    build:
+      context: ./microservices/chat-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://chat_user:chat_password@chat-db:5432/chat_db
+    depends_on:
+      - chat-db
+    networks:
+      - libreria-network
+
+  # Base de datos Auth Service
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5437:5432"
+    networks:
+      - libreria-network
+
+  # Base de datos Product Service
+  product-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_password
+    volumes:
+      - product_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - libreria-network
+
+  # Base de datos Invoice Service
+  invoice-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: invoice_db
+      POSTGRES_USER: invoice_user
+      POSTGRES_PASSWORD: invoice_password
+    volumes:
+      - invoice_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    networks:
+      - libreria-network
+
+  # Base de datos Chat Service
+  chat-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: chat_db
+      POSTGRES_USER: chat_user
+      POSTGRES_PASSWORD: chat_password
+    volumes:
+      - chat_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    networks:
+      - libreria-network
+
+  # Prometheus para métricas
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - libreria-network
+
+  # Grafana para visualización
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - libreria-network
+
+volumes:
+  auth_postgres_data:
+  product_postgres_data:
+  invoice_postgres_data:
+  chat_postgres_data:
+  grafana_data:
+
+networks:
+  libreria-network:
+    driver: bridge
