@@ -1,15 +1,6 @@
-import { useAuth } from '@/hooks/useAuth';
-import { LoadingPage } from '@/components/ui/LoadingSpinner';
 import Link from 'next/link';
-import { UserRole } from '@/types/auth';
 
 const HomePage = () => {
-  const { user, loading, isAuthenticated } = useAuth();
-
-  if (loading) {
-    return <LoadingPage text="Cargando aplicación..." />;
-  }
-
   return (
     <div className="page-content">
       <div className="container">
@@ -30,36 +21,17 @@ const HomePage = () => {
             comunicación en tiempo real con tus clientes.
           </p>
 
-          {!isAuthenticated ? (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth/register" className="btn-primary text-lg px-8 py-3">
-                Comenzar ahora
-              </Link>
-              <Link href="/auth/login" className="btn-outline text-lg px-8 py-3">
-                Iniciar sesión
-              </Link>
-            </div>
-          ) : (
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                ¡Hola, {user?.firstName}!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Rol: <span className="font-medium">{user?.role}</span>
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                {user?.role === UserRole.ADMIN ? (
-                  <Link href="/admin/dashboard" className="btn-primary text-lg px-8 py-3">
-                    Panel de Administración
-                  </Link>
-                ) : (
-                  <Link href="/dashboard" className="btn-primary text-lg px-8 py-3">
-                    Mi Dashboard
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/catalog" className="btn-primary text-lg px-8 py-3">
+              Ver Catálogo
+            </Link>
+            <Link href="/auth/login" className="btn-outline text-lg px-8 py-3">
+              Iniciar Sesión
+            </Link>
+            <Link href="/auth/register" className="btn-outline text-lg px-8 py-3">
+              Crear Cuenta
+            </Link>
+          </div>
         </div>
 
         {/* Features Section */}
@@ -120,19 +92,17 @@ const HomePage = () => {
         </div>
 
         {/* CTA Section */}
-        {!isAuthenticated && (
-          <div className="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white my-16">
-            <h2 className="text-3xl font-bold mb-4">
-              ¿Listo para comenzar?
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Únete a nuestra plataforma y transforma la gestión de tu librería.
-            </p>
-            <Link href="/auth/register" className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors duration-200">
-              Crear cuenta gratis
-            </Link>
-          </div>
-        )}
+        <div className="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white my-16">
+          <h2 className="text-3xl font-bold mb-4">
+            ¿Listo para comenzar?
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            Únete a nuestra plataforma y transforma la gestión de tu librería.
+          </p>
+          <Link href="/auth/register" className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors duration-200">
+            Crear cuenta gratis
+          </Link>
+        </div>
       </div>
     </div>
   );

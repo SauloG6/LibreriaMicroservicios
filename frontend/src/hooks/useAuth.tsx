@@ -98,9 +98,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUserState(null);
     toast.success('Sesión cerrada exitosamente');
     
-    // Redirigir al login
+    // Redirigir a la pantalla principal
     if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login';
+      window.location.href = '/';
     }
   };
 

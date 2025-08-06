@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { LoginData } from '@/types/auth';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { redirectAfterLogin } from '@/utils/auth';
+import { redirectAfterLogin, getUser } from '@/utils/auth';
 
 interface LoginFormData {
   email: string;
@@ -29,8 +29,9 @@ const LoginPage = () => {
     try {
       await login(data);
       
-      // Obtener el usuario actualizado para redireccionar según rol
-      const redirectUrl = router.query.redirect as string || '/dashboard';
+      // Redireccionar usando la función de utilidad
+      const user = getUser();
+      const redirectUrl = router.query.redirect as string || (user ? redirectAfterLogin(user.role) : '/dashboard');
       router.push(redirectUrl);
     } catch (error) {
       setError('root', {

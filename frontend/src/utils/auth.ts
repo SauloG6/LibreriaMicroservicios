@@ -64,7 +64,7 @@ export const hasRole = (role: UserRole): boolean => {
 };
 
 export const isAdmin = (): boolean => {
-  return hasRole(UserRole.ADMIN) || hasRole(UserRole.SUPER_ADMIN);
+  return hasRole(UserRole.ADMIN);
 };
 
 export const isUser = (): boolean => {
@@ -81,10 +81,9 @@ export const logout = (): void => {
 export const redirectAfterLogin = (userRole: UserRole): string => {
   switch (userRole) {
     case UserRole.ADMIN:
-    case UserRole.SUPER_ADMIN:
-      return '/admin/dashboard';
+      return '/admin/books';
     case UserRole.USER:
-      return '/dashboard';
+      return '/user/dashboard';
     default:
       return '/';
   }

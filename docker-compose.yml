@@ -43,6 +43,12 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://product_user:product_password@product-db:5432/product_db
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - JWT_EXPIRES_IN=7d
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3002
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - SWAGGER_ENABLED=true
+      - SWAGGER_PATH=/api
     depends_on:
       - product-db
     networks:

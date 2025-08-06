@@ -11,9 +11,8 @@ export interface User {
 }
 
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMINISTRADOR',
+  USER = 'CLIENTE',
 }
 
 export interface AuthResponse {
