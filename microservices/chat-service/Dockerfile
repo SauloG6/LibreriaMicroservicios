@@ -1,32 +1,56 @@
-# Etapa de desarrollo
-FROM node:18-alpine AS development
+# ============================================
+# Stage 1: Build stage
+# ============================================
+FROM node:18-alpine AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
+# Copiar archivos de dependencias primero (mejor cache de Docker)
 COPY package*.json ./
-RUN npm ci --only=development
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 
-COPY . .
+# Instalar todas las dependencias (incluyendo devDependencies para build)
+RUN npm ci --only=production=false && npm cache clean --force
+
+# Copiar código fuente
+COPY src/ ./src/
+
+# Compilar TypeScript
 RUN npm run build
 
-# Etapa de producción  
+# ============================================
+# Stage 2: Production stage
+# ============================================
 FROM node:18-alpine AS production
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Crear usuario no-root para seguridad
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
+# Copiar archivos de dependencias
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
 
-COPY --from=development /usr/src/app/dist ./dist
+# Instalar solo dependencias de producción
+RUN npm ci --only=production && \
+    npm cache clean --force && \
+    rm -rf /tmp/*
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+# Copiar código compilado desde build stage
+COPY --from=builder /app/dist ./dist
 
+# Cambiar ownership de archivos al usuario no-root
+RUN chown -R nestjs:nodejs /app
 USER nestjs
 
+# Exponer el puerto
 EXPOSE 3004
 
-CMD ["node", "dist/main"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3004/messages', (res) => { process.exit(res.statusCode === 200 || res.statusCode === 404 ? 0 : 1) })"
+
+# Comando para ejecutar la aplicación
+CMD ["node", "dist/main.js"]
